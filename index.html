@@ -8,8 +8,14 @@
          <script src="https://js.arcgis.com/3.23/"></script>
 	</head>
          <script>
+          function BaseMap()
+             {
+                 var long;
+                 var lati;
+                 var long=document.getElementById("longitude").value;
+                 var latitude=document.getElementById("latitude").value;
            require(["esri/map", "dojo/domReady!"],
-             function(Map) 
+           function(Map) 
 	                  {
 		                  map = new Map("map", 
 		                 {
@@ -18,6 +24,7 @@
 			              zoom: 13
 		                 });
 	                 });
+             }
          </script>
 		
 		<style>
@@ -28,8 +35,9 @@
       }
 </style>
 	
-	<body class="claro">
+	<body class="claro",>
           <div id="map"></div>
+              
     </body>
     
 </html>
