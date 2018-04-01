@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Webgis_3</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.23/dijit/themes/claro/claro.css">  
+    <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
+    <style> 
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+        #map
+        {
+            position: absolute;
+            width: 50%;            
+            height: 100%;
+        }
+        #map2
+        {
+            position: absolute;
+            width: 50%;
+            left: 700px;
+            height: 100%;
+        }
+      
+  </style> 
+    <script src="https://js.arcgis.com/3.23/"></script>
+    <script>
+        
+        var dynamicMapServiceLayer,map,visible = [];
+        var map2,map3,map4;
+        var scalebar;
+        require(["esri/map", 
+                 "esri/arcgis/utils","esri/layers/FeatureLayer", 
+                 "esri/dijit/LayerList", 
+                 "dojo/parser",
+                 "esri/geometry/webMercatorUtils", 
+                 "esri/dijit/Scalebar",
+                 "dojo/dom",
+                 "dijit/layout/BorderContainer", 
+                 "dijit/layout/ContentPane",
+                 "dijit/TitlePane",
+                 "dojo/domReady!"],
+        function(Map,arcgisUtils,FeatureLayer,LayerList,parser,webMercatorUtils,Scalebar,dom) 
+                {
+            parser.parse();
+            map = new Map("map", {
+                        basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+                        center: [-110, 56], // longitude, latitude
+                        zoom:  3
+                    });
+        
+           
+            
+            map2 = new Map("map2", {
+          basemap: "gray",  
+          center: [114, 39], // longitude, latitude
+          zoom: 4
+        });
+            
+            
+            
+            scalebar = new Scalebar({
+            map: map,
+          // "dual" displays both miles and kilometers
+          // "english" is the default, which displays miles
+          // use "metric" for kilometers
+          scalebarUnit: "dual"
+        });
+            
+            arcgisUtils.createMap("df8bcc10430f48878b01c96e907a1fc3", "map").then(function (response) {
+                //创建新的图层列表控件，放在id为“layerList”的div里
+                var myWidget = new LayerList({
+                    map: response.map,
+                    //根据请求返回的地图，获取地图的图层列表，添加到图层列表的图层中
+                    layers: arcgisUtils.getLayerList(response)
+                    //把图层列表放置在id为“layerList”的div里
+                }, "layerList");
+                //打开图层列表
+                myWidget.startup();
+            });
+            
+             dynamicMapServiceLayer = new esri.layers.ArcGISDynamicMapServiceLayer(
+                "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer"
+            );
+            
+            if (dynamicMapServiceLayer.loaded) {        
+                buildLayerList(dynamicMapServiceLayer);              
+            }else{
+                dojo.connect(dynamicMapServiceLayer,"onLoad",buildLayerList);
+            } 
+            
+              
+            
+            //显示地图坐标  
+             map2.on("load", function () {  
+                 //after map loads, connect to listen to mouse move & drag events  
+                 map2.on("mouse-move", showCoordinates2);  
+                 map2.on("mouse-drag", showCoordinates2);  
+             });  
+             map.on("load", function () {  
+                 //after map loads, connect to listen to mouse move & drag events  
+                 map.on("mouse-move", showCoordinates);  
+                 map.on("mouse-drag", showCoordinates);  
+             });
+             function showCoordinates(evt) {  
+                 //the map is in web mercator but display coordinates in geographic (lat, long)  
+                 var mp = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);  
+                 //display mouse coordinates  
+                 dom.byId("info").innerHTML = "x=" + mp.x.toFixed(3) + ", " +"y=" + mp.y.toFixed(3);  
+             }  
+            function showCoordinates2(evt) {  
+                 //the map is in web mercator but display coordinates in geographic (lat, long)  
+                 var mp2 = webMercatorUtils.webMercatorToGeographic(evt.mapPoint);  
+                 //display mouse coordinates  
+                 dom.byId("info2").innerHTML = "x=" + mp2.x.toFixed(3) + ", " +"y=" + mp2.y.toFixed(3);  
+             }  
+           
+            map.on("extent-change",function(event){
+          if(map2)
+              {
+                  map2.setExtent(event.extent);
+              }
+        })
+            
+
+            map2.on("extent-change",function(event){
+          if(map)
+              {
+                  map.setExtent(event.extent);
+              }
+        })
+
+                }); 
+
+        function buildLayerList(layer) {
+            var infos = layer.layerInfos, info;
+            var items = [];
+            for (var i=0,j=infos.length;i<j;i++) {
+                info = infos[i];
+                if (info.defaultVisibility) {
+                    visible.push(info.id);
+                }
+                items[i] = "<input type='checkbox' class='list_item' checked='" + (info.defaultVisibility ? "checked" : "") + "' id='" + info.id +"' onclick='updateLayerVisibility();'/><label for='" +info.id+ "'>" +info.name+ "</label>";          
+            }
+            dojo.byId("layer_list").innerHTML = items.join();
+            
+            layer.setVisibleLayers(visible);
+            map.addLayer(layer);
+        
+        }
+        
+        function updateLayerVisibility() {
+            var inputs = dojo.query(".list_item"), input;
+            visible = [];
+            for (var i=0,j=inputs.length;i<j;i++) {
+                if(inputs[i].checked) {
+                    visible.push(inputs[i].id);
+                }           
+            }
+            dynamicMapServiceLayer.setVisibleLayers(visible);
+        
+        }
+        
+        
+        function showHybridMap(){
+            map2.setBasemap("hybrid");
+        }
+        
+        function showOsmMap(){
+            map2.setBasemap("osm");
+        }
+        function showOceansMap(){
+            map2.setBasemap("oceans");
+        }
+        
+          
+    </script>
+  </head>
+    <body class="claro">
+        <input type="button" onclick="location.href='swipe.html'" value="卷帘" style="position:absolute; right:10px; top:10px; background-color: aqua;color: navy;width=3000px;height=70px">
+            <div id="map2" >
+                <!--  坐标-->           
+                     <span id="info2" style="position:absolute; left:270px; bottom:5px; color:#000; z-index:100;"></span> 
+                 <div style="position:absolute; right:20px; top:10px; z-Index:999;">
+                    <div data-dojo-type="dijit/TitlePane" data-dojo-props="title:'选择底图', open:true">
+                        <div data-dojo-type="dijit/layout/ContentPane" style="width:300px; height:280px; overflow:auto;">
+                            <br>
+                            <div style="align-content: center;width: 130px;height: 100px">
+                                <input name="hybrid" type="button" onclick="showHybridMap()" style=" width:110px; height:70px;  border:0; background:url(hybrid.jpg) no-repeat" />
+                                hybrid
+                            </div>
+                            <div >
+                                <input name="osm" type="button" onclick="showOsmMap()" style=" width:110px; height:70px;  border:0; background:url(osm.jpg) no-repeat" />
+                                OSM
+                            </div>      
+                            <div>
+                                <input name="oceans" type="button" onclick="showOceansMap()" style=" width:110px; height:70px;  border:0; background:url(oceans.jpg) no-repeat" />
+                                oceans
+                            </div>
+                            
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+   
+        <div id="map" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'" >
+            <div style="position:absolute; left:300px; top:10px; z-Index:999;">
+                <div data-dojo-type="dijit/TitlePane" data-dojo-props="title:'选择图层', open:true">
+                    <span id="layer_list"></span><br/>
+                </div>
+            </div>
+            <!--  坐标-->           
+            <span id="info" style="position:absolute; left:270px; bottom:5px; color:#000; z-index:100;"></span>
+        </div>
+        
+</body> 
+    
+</html>
