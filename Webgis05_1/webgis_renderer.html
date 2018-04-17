@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Symble and Renderer</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
+    <style>
+      html, body, #map {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        position:
+      }
+    #visualChoice{
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        padding: 7px 0;
+        z-index: 1;
+        text-align: right;
+         
+        }
+      body {
+        background-color: #FFF;
+        overflow: hidden;
+        font-family: "Trebuchet MS";
+      }
+      
+    </style>
+    <script src="https://js.arcgis.com/3.23/"></script>
+    <script>
+      var map, csv,renderer;
+
+      require([
+        "esri/map", 
+        "esri/layers/CSVLayer",
+        "esri/Color",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/renderers/SimpleRenderer",
+        "esri/InfoTemplate",
+        "esri/config",
+        "dojo/domReady!"
+      ], function(
+        Map, CSVLayer, Color, SimpleMarkerSymbol, SimpleRenderer, InfoTemplate, esriConfig
+      ) {
+        
+        // Use CORS
+        esriConfig.defaults.io.corsEnabledServers.push("earthquake.usgs.gov"); // supports CORS
+
+        // Use proxy if the server doesn't support CORS
+        // esriConfig.defaults.io.proxyUrl = "/proxy/";  
+        
+        map = new Map("map", {
+          basemap: "gray",
+          center: [ -60, -10 ],
+          zoom: 4 
+        });
+        csv = new CSVLayer("all_month2.csv", {
+          copyright: "USGS.gov"
+        });
+        var orangeRed = new Color([238, 69, 0, 0.5]); // hex is #ff4500
+        var marker = new SimpleMarkerSymbol("solid", 15, null, orangeRed);
+        var renderer = new SimpleRenderer(marker);
+        csv.setRenderer(renderer);
+        var template = new InfoTemplate("${type}", "${place}");
+        csv.setInfoTemplate(template);
+        map.addLayer(csv);
+      });
+        
+        //可视化1
+       var color;
+        function changeMarker(){     
+      require([
+        "esri/map", 
+        "esri/layers/CSVLayer",
+        "esri/Color",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/renderers/SimpleRenderer",
+        "esri/InfoTemplate",
+        "esri/config",
+        "dojo/domReady!"
+      ], function(
+        Map, CSVLayer, Color, SimpleMarkerSymbol, SimpleRenderer, InfoTemplate, esriConfig
+      ) {
+       color = new Color([255, 59, 0, 2]); // hex is #ff4500
+        var marker = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_DIAMOND, 8, null, color);
+        var renderer = new SimpleRenderer(marker);
+        csv.setRenderer(renderer);
+        var template = new InfoTemplate("${type}", "${place}");
+        csv.setInfoTemplate(template);
+        map.addLayer(csv);
+        });
+        }
+    </script>
+  </head>
+
+   <body class="claro"> 
+    <div id="map">
+        <div id=visualChoice>
+         <input type="button" id="renderer1" value="切换可视化1" onclick="changeMarker()" style="background-color:tomato">
+        <input type="button" id="renderer2" value="切换可视化2" onclick="location.href='mag.html'" style="background-color:lightcoral"> 
+   </div>
+       </div>
+  </body>
+</html>
