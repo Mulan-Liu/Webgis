@@ -72,7 +72,7 @@
             });
             
             map.on("load",function(){  
-                $.get("https://qqq807111690.github.io/web4gis15/json3.json",null,function(result){  
+                $.get("https://mulan-liu.github.io/Webgis/Webgis05_2/CHN_adm1.json",null,function(result){  
                     
                     var features = result.features;  
                     for(var i=0;i<features.length;i++){  
@@ -89,14 +89,13 @@
             });
        var  border = new SimpleRenderer(new SimpleFillSymbol().setOutline(new SimpleLineSymbol().setWidth(0.1).setColor(new Color([255,0,0]))).setColor(new Color([56, 168, 0, 0.5])));
            var orangeRed = new Color([238, 69, 0, 0.5]); 
-		   var  renderer = new SimpleRenderer(new SimpleMarkerSymbol("solid", 15, null, orangeRed));
-			  renderer.setSizeInfo({
-              field:"POPU",
-              minSize:3,
-              maxSize:50,
-              minDataValue:0,
-              maxDataValue:12000
-               });
+		   var marker = new SimpleMarkerSymbol("solid", 20, null, orangeRed);
+         var renderer = new ClassBreaksRenderer(marker, "CHN_adm1.Population");//以mag字段为例，划分为五个等级
+        renderer.addBreak(0,2000, new SimpleMarkerSymbol().setSize(15).setColor(new Color([238, 69, 0, 0.5])));//设置每一等级的颜色
+        renderer.addBreak(2000, 4000, new SimpleMarkerSymbol().setSize(25).setColor(new Color([238, 69, 0, 0.5])));
+        renderer.addBreak(4000, 6000, new SimpleMarkerSymbol().setSize(35).setColor(new Color([238, 69, 0, 0.5])));
+        renderer.addBreak(6000, 8000, new SimpleMarkerSymbol().setSize(45).setColor(new Color([238, 69, 0, 0.5])));
+        renderer.addBreak(8000, Infinity, new SimpleMarkerSymbol().setSize(55).setColor(new Color([238, 69, 0, 0.5])));
             gLayer.setRenderer(border);
             gLayer1.setRenderer(renderer);
             var infoTemplate = new InfoTemplate( "${*}");//显示所有字段类容
@@ -108,9 +107,6 @@
 </head>  
 <body class="claro"> 
     <div id="map">
-        <div id=visualChoice>
-         <input type="button" id="renderer1" value="切换可视化" onclick="location.href='Population_break.html'" style="background-color:tomato">
-   </div>
        </div>
   </body> 
 </html> 
