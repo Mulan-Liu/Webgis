@@ -71,7 +71,7 @@
             });
             
             map.on("load",function(){  
-                $.get("https://qqq807111690.github.io/web4gis15/json3.json",null,function(result){  
+                $.get("https://mulan-liu.github.io/Webgis/Webgis05_2/CHN_adm1.json",null,function(result){  
                     
                     var features = result.features;  
                     for(var i=0;i<features.length;i++){  
@@ -88,7 +88,7 @@
             });
             var symbol = new SimpleFillSymbol();
             symbol.setColor(new Color([150, 150, 150, 0.5]));
-            var renderer = new ClassBreaksRenderer(symbol, "POPU");
+            var renderer = new ClassBreaksRenderer(symbol, "CHN_adm1.Population");
             renderer.addBreak(0, 2000, new SimpleFillSymbol().setColor(new Color([56, 168, 0, 0.5])));
             renderer.addBreak(2000, 4000, new SimpleFillSymbol().setColor(new Color([139, 209, 0, 0.5])));
             renderer.addBreak(4000, 8000, new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])));
