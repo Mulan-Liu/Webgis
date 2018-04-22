@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Class Breaks Renderer</title>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
+    <style>
+      html, body, #map{
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+    <script src="https://js.arcgis.com/3.23/"></script>
+    <script>
+      var map;
+  require([
+        "esri/map", "esri/layers/CSVLayer",
+        "esri/InfoTemplate", "esri/symbols/SimpleMarkerSymbol", 
+        "esri/renderers/ClassBreaksRenderer",
+        "esri/Color", "dojo/dom-style", "dojo/domReady!"
+      ], function(
+        Map, CSVLayer,
+        InfoTemplate, SimpleMarkerSymbol, 
+        ClassBreaksRenderer,
+        Color, domStyle
+      ){
+        map = new Map("map", {
+          basemap: "gray",
+          center: [-60, -10],
+          zoom: 4
+         
+        });
+        var orangeRed = new Color([238, 69, 0, 0.5]); // hex is #ff4500
+       var marker = new SimpleMarkerSymbol("solid", 5, null, orangeRed);
+      
+        esriConfig.defaults.io.corsEnabledServers.push("earthquake.usgs.gov"); // supports CORS，解决跨域问题
+        var renderer = new ClassBreaksRenderer(marker, "mag");//以mag字段为例，划分为五个等级
+        renderer.addBreak(0, 1, new SimpleMarkerSymbol().setSize(8).setColor(new Color([56, 168, 0, 0.5])));//设置每一等级的颜色
+        renderer.addBreak(1, 3, new SimpleMarkerSymbol().setSize(12).setColor(new Color([139, 209, 0, 0.5])));
+        renderer.addBreak(3, 5, new SimpleMarkerSymbol().setSize(16).setColor(new Color([255, 255, 0, 0.5])));
+        renderer.addBreak(5, 6, new SimpleMarkerSymbol().setSize(20).setColor(new Color([255, 128, 0, 0.5])));
+        renderer.addBreak(6, Infinity, new SimpleMarkerSymbol().setSize(24).setColor(new Color([255, 0, 0, 0.5])));
+       
+        var infoTemplate = new InfoTemplate( "${*}");//显示所有字段类容
+        var featureLayer = new CSVLayer("all_month2.csv", {
+          mode: CSVLayer.MODE_SNAPSHOT,
+          outFields: ["*"],
+          infoTemplate: infoTemplate
+        });
+        featureLayer.setRenderer(renderer);
+        map.addLayer(featureLayer);
+      });
+    </script>
+  </head>
+  
+  <body>
+    <div id="map"></div>
+  </body>
+
+</html>
+ 
