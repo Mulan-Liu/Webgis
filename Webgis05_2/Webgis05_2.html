@@ -1,0 +1,111 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">  
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no">  
+    <title>CHN_adm</title>  
+    <link rel="stylesheet" href="https://js.arcgis.com/3.23/esri/css/esri.css">
+    <!--<link rel="stylesheet" href="http://localhost/arcgis_js_api/library/3.9/js/esri/css/esri.css">-->
+    <style>  
+        html, body, #map {  
+            height: 100%;  
+            width: 100%;  
+            margin: 0;  
+            padding: 0;  
+        }  
+        #visualChoice{
+        position: absolute;
+        top: 10px;
+        width: 100%;
+        padding: 7px 0;
+        z-index: 1;
+        text-align: right;
+         
+        }
+        
+    </style>  
+      <!-- <script src="http://localhost/arcgis_js_api/library/3.9/"></script>-->
+ <script src="https://js.arcgis.com/3.23/"></script>
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
+    <!--<script src="./js/jsonConverters.js"></script>-->  
+    <script>  
+        var map;  
+        var renderer;
+        var glayer;
+        var glayer1;
+        require([ "esri/map",  
+            "esri/layers/ArcGISTiledMapServiceLayer",  
+            "esri/layers/GraphicsLayer",  
+            "esri/symbols/SimpleMarkerSymbol",  
+            "esri/symbols/SimpleLineSymbol",  
+            "esri/renderers/SimpleRenderer",  
+            "esri/symbols/SimpleFillSymbol",
+            "esri/Color",
+            "esri/geometry/Point",  
+            "esri/graphic",  
+            "esri/InfoTemplate",
+            "esri/renderers/ClassBreaksRenderer",
+            "dojo/domReady!"  
+        ],  
+        function(Map,  
+            Tiled,  
+            GraphicsLayer,  
+            SimpleMarkerSymbol,  
+            SimpleLineSymbol,  
+            SimpleRenderer, SimpleFillSymbol, 
+            Color, Point, Graphic,InfoTemplate, ClassBreaksRenderer,){  
+           	map = new Map("map", {
+			    basemap: "topo",
+			    center: [114, 32],
+			    zoom: 5
+		 	 });
+
+//          var mapCenter = new Point(103.847, 36.0473, {"wkid":4326});  
+//          map.centerAndZoom(mapCenter,1);  
+            var gLayer = new GraphicsLayer();  
+            var gLayer1 = new GraphicsLayer(); 
+            map.addLayer(gLayer);
+            
+             gLayer.on("click",function(feature){  
+             console.log(feature);
+            });
+            
+            map.on("load",function(){  
+                $.get("https://qqq807111690.github.io/web4gis15/json3.json",null,function(result){  
+                    
+                    var features = result.features;  
+                    for(var i=0;i<features.length;i++){  
+                        var feature = features[i]; 
+    				    //feature.symbol = {"color":[0,0,255,200],  
+                           /// "size":12,"angle":0,"xoffset":0,"yoffset":0,"type":"esriSLS","style":"esriSLSSolid",
+                           // "outline":{"color":[0,0,0,255],"width":1,"type":"esriSLS","style":"esriSLSSolid"}};  
+                            var graphic  = new Graphic(feature);  
+                            var graphic1  = new Graphic(feature);  
+                            gLayer.add(graphic); 
+                           gLayer1.add(graphic1);  
+                    }
+                });  
+            });
+            var symbol = new SimpleFillSymbol();
+            symbol.setColor(new Color([150, 150, 150, 0.5]));
+            var renderer = new ClassBreaksRenderer(symbol, "POPU");
+            renderer.addBreak(0, 2000, new SimpleFillSymbol().setColor(new Color([56, 168, 0, 0.5])));
+            renderer.addBreak(2000, 4000, new SimpleFillSymbol().setColor(new Color([139, 209, 0, 0.5])));
+            renderer.addBreak(4000, 8000, new SimpleFillSymbol().setColor(new Color([255, 255, 0, 0.5])));
+            renderer.addBreak(8000, 10000, new SimpleFillSymbol().setColor(new Color([255, 128, 0, 0.5])));
+            renderer.addBreak(10000, Infinity, new SimpleFillSymbol().setColor(new Color([255, 0, 0, 0.5])));
+            gLayer1.setRenderer(renderer);
+            var infoTemplate = new InfoTemplate( "${*}");//显示所有字段类容
+	        gLayer.setInfoTemplate(infoTemplate);
+            map.addLayer(gLayer1); 
+        }); 
+    </script>  
+</head>  
+<body class="claro"> 
+    <div id="map">
+        <div id=visualChoice>
+         <input type="button" id="renderer1" value="切换可视化" onclick="location.href='Population_break.html'" style="background-color:tomato">
+   </div>
+       </div>
+  </body> 
+</html> 
